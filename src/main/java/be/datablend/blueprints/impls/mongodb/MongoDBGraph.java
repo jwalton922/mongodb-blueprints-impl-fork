@@ -140,14 +140,14 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
     @Override
     public Iterable<Edge> getEdges() {
         DBCursor cursor = edgeCollection.find(new BasicDBObject(), BasicDBObjectBuilder.start(MONGODB_ID, 1).get());
-        return new MongoDBIterable<Edge>(cursor, this, Edge.class);
+        return new MongoDBIterable<Edge>(cursor, this, Edge.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
     }
 
     @Override
     public Iterable<Edge> getEdges(String key, Object value) {
         DBCursor cursor = edgeCollection.find(QueryBuilder.start(MongoDBUtil.createPropertyKey(key)).is(value).get(),
                 BasicDBObjectBuilder.start(MONGODB_ID, 1).get());
-        return new MongoDBIterable<Edge>(cursor, this, Edge.class);
+        return new MongoDBIterable<Edge>(cursor, this, Edge.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
     }
 
     @Override
@@ -191,14 +191,14 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
     @Override
     public Iterable<Vertex> getVertices() {
         DBCursor cursor = vertexCollection.find(new BasicDBObject(), BasicDBObjectBuilder.start(MONGODB_ID, 1).get());
-        return new MongoDBIterable<Vertex>(cursor, this, Vertex.class);
+        return new MongoDBIterable<Vertex>(cursor, this, Vertex.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
     }
 
     @Override
     public Iterable<Vertex> getVertices(String key, Object value) {
         DBCursor cursor = vertexCollection.find(QueryBuilder.start(MongoDBUtil.createPropertyKey(key)).is(value).get(),
                 BasicDBObjectBuilder.start(MONGODB_ID, 1).get());
-        return new MongoDBIterable<Vertex>(cursor, this, Vertex.class);
+        return new MongoDBIterable<Vertex>(cursor, this, Vertex.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
     }
 
     @Override
@@ -264,6 +264,7 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
     }
 
     public GraphQuery query() {
-        return new DefaultGraphQuery(this);
+        //return new DefaultGraphQuery(this);
+        return new MongoDBQuery(this);
     }
 }

@@ -35,7 +35,7 @@ public class MongoDBVertex extends MongoDBElement implements Vertex {
         if (labels.length != 0) {
             builder.and(StringFactory.LABEL).in(labels);
         }
-        return new MongoDBIterable<Edge>(graph.getEdgeCollection().find(builder.get(), BasicDBObjectBuilder.start(MONGODB_ID,1).get()), graph, Edge.class);
+        return new MongoDBIterable<Edge>(graph.getEdgeCollection().find(builder.get(), BasicDBObjectBuilder.start(MONGODB_ID,1).get()), graph, Edge.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
     }
 
     public Iterable<Edge> getOutEdges(final String... labels) {
@@ -43,7 +43,7 @@ public class MongoDBVertex extends MongoDBElement implements Vertex {
         if (labels.length != 0) {
             builder.and(StringFactory.LABEL).in(labels);
         }
-        return new MongoDBIterable<Edge>(graph.getEdgeCollection().find(builder.get(), BasicDBObjectBuilder.start(MONGODB_ID,1).get()), graph, Edge.class);
+        return new MongoDBIterable<Edge>(graph.getEdgeCollection().find(builder.get(), BasicDBObjectBuilder.start(MONGODB_ID,1).get()), graph, Edge.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
     }
 
     @Override
@@ -75,14 +75,14 @@ public class MongoDBVertex extends MongoDBElement implements Vertex {
             while (edgesit.hasNext()) {
                 vertices.add(edgesit.next().getVertex(Direction.IN).getId());
             }
-            return new MongoDBIterable(vertices, this.graph, Vertex.class);
+            return new MongoDBIterable(vertices, this.graph, Vertex.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
         } else if (direction.equals(Direction.IN)) {
             Iterator<Edge> edgesit = this.getInEdges(labels).iterator();
             List<Object> vertices = new ArrayList<Object>();
             while (edgesit.hasNext()) {
                 vertices.add(edgesit.next().getVertex(Direction.OUT).getId());
             }
-            return new MongoDBIterable(vertices, this.graph, Vertex.class);
+            return new MongoDBIterable(vertices, this.graph, Vertex.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE);
         }
         else {
             Iterator<Edge> outEdgesIt = this.getOutEdges(labels).iterator();
@@ -95,7 +95,7 @@ public class MongoDBVertex extends MongoDBElement implements Vertex {
             while (inEdgesIt.hasNext()) {
                 invertices.add(inEdgesIt.next().getVertex(Direction.OUT).getId());
             }
-            return new MultiIterable<Vertex>(Arrays.<Iterable<Vertex>>asList(new MongoDBIterable(outvertices, this.graph, Vertex.class), new MongoDBIterable(invertices, this.graph, Vertex.class)));
+            return new MultiIterable<Vertex>(Arrays.<Iterable<Vertex>>asList(new MongoDBIterable(outvertices, this.graph, Vertex.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE), new MongoDBIterable(invertices, this.graph, Vertex.class, new ArrayList<PredicateContainer>(), Integer.MAX_VALUE)));
         }
     }
 
