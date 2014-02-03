@@ -1,6 +1,6 @@
 package be.datablend.blueprints.impls.mongodb.util;
 
-import be.datablend.blueprints.impls.mongodb.MongoDBGraph;
+import be.datablend.blueprints.impls.mongodb.MongoDBGraphFork;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.rexster.Tokens;
 import com.tinkerpop.rexster.config.GraphConfiguration;
@@ -53,13 +53,13 @@ public class MongoDBGraphConfiguration implements GraphConfiguration {
         if(username != null && password != null) {
             // create mongo graph with username and password
             try {
-                return new MongoDBGraph(host, port, username, password);
+                return new MongoDBGraphFork(host, port, username, password);
             } catch (Exception ex) {
                 throw new GraphConfigurationException(ex);
             }
         } else {
             try {
-                return new MongoDBGraph(host, port);
+                return new MongoDBGraphFork(host, port);
 
             } catch (Exception ex) {
                 throw new GraphConfigurationException(ex);

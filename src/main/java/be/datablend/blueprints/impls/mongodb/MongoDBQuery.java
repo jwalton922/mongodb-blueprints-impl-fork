@@ -24,13 +24,13 @@ import java.util.List;
  */
 public class MongoDBQuery extends DefaultGraphQuery {
 
-    private MongoDBGraph graph;
+    private MongoDBGraphFork graph;
     private BasicDBObject query = new BasicDBObject();
     private List<PredicateContainer> predicates = new ArrayList<PredicateContainer>();
 
     public MongoDBQuery(Graph graph) {
         super(graph);
-        this.graph = (MongoDBGraph) graph;
+        this.graph = (MongoDBGraphFork) graph;
     }
 
     @Override
@@ -56,6 +56,7 @@ public class MongoDBQuery extends DefaultGraphQuery {
     @Override
     public <T extends Comparable<T>> GraphQuery has(String key, T value, Compare compare) {
         super.has(key, value, compare);
+        
         String operator = null;
         if (compare == Compare.GREATER_THAN) {
             operator = "$gt";
@@ -75,6 +76,7 @@ public class MongoDBQuery extends DefaultGraphQuery {
         } else {
             query.append(MongoDBUtil.createPropertyKey(key), value);
         }
+        System.out.println("Adding compare query to query object: "+query.toString());
         return this;
     }
 

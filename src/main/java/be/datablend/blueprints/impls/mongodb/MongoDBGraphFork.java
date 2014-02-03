@@ -15,7 +15,7 @@ import com.tinkerpop.blueprints.util.DefaultGraphQuery;
  *
  * @author Davy Suvee (http://datablend.be)
  */
-public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
+public class MongoDBGraphFork implements MetaGraph<DB>, KeyIndexableGraph {
 
     private final DB graphDatabase;
     private final DBCollection edgeCollection;
@@ -27,7 +27,7 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
     /**
      * Construct a graph on top of MongoDB
      */
-    public MongoDBGraph(final String host, final int port) {
+    public MongoDBGraphFork(final String host, final int port) {
         try {
             Mongo mongo = new Mongo(host, port);
             graphDatabase = mongo.getDB(GRAPH_DATABASE);
@@ -36,7 +36,7 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
             edgeCollection.ensureIndex(new BasicDBObject().append(IN_VERTEX_PROPERTY, 1));
             edgeCollection.ensureIndex(new BasicDBObject().append(OUT_VERTEX_PROPERTY, 1));
         } catch (UnknownHostException e) {
-            throw new RuntimeException(MongoDBGraph.MONGODB_ERROR_EXCEPTION_MESSAGE);
+            throw new RuntimeException(MongoDBGraphFork.MONGODB_ERROR_EXCEPTION_MESSAGE);
         }
     }
 
@@ -44,7 +44,7 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
      *
      * @param graphDatabase
      */
-    public MongoDBGraph(DB graphDatabase) {
+    public MongoDBGraphFork(DB graphDatabase) {
         
         this.graphDatabase = graphDatabase;
         edgeCollection = graphDatabase.getCollection(EDGE_COLLECTION);
@@ -57,7 +57,7 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
     /**
      * Construct a graph on top of MongoDB
      */
-    public MongoDBGraph(final String host, final int port, final String username, final String password) {
+    public MongoDBGraphFork(final String host, final int port, final String username, final String password) {
         try {
             Mongo mongo = new Mongo(host, port);
             graphDatabase = mongo.getDB(GRAPH_DATABASE);
@@ -67,9 +67,9 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
             edgeCollection.ensureIndex(new BasicDBObject().append(IN_VERTEX_PROPERTY, 1));
             edgeCollection.ensureIndex(new BasicDBObject().append(OUT_VERTEX_PROPERTY, 1));
         } catch (UnknownHostException e) {
-            throw new RuntimeException(MongoDBGraph.MONGODB_ERROR_EXCEPTION_MESSAGE);
+            throw new RuntimeException(MongoDBGraphFork.MONGODB_ERROR_EXCEPTION_MESSAGE);
         } catch (MongoException e) {
-            throw new RuntimeException(MongoDBGraph.MONGODB_ERROR_AUTH_MESSAGE, e);
+            throw new RuntimeException(MongoDBGraphFork.MONGODB_ERROR_AUTH_MESSAGE, e);
         }
     }
 
@@ -264,6 +264,7 @@ public class MongoDBGraph implements MetaGraph<DB>, KeyIndexableGraph {
     }
 
     public GraphQuery query() {
+        System.out.println("Creating MongoDBQuery");
         //return new DefaultGraphQuery(this);
         return new MongoDBQuery(this);
     }

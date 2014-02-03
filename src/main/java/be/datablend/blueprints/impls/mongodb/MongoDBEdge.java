@@ -15,11 +15,11 @@ import static be.datablend.blueprints.impls.mongodb.util.MongoDBUtil.*;
  */
 public class MongoDBEdge extends MongoDBElement implements Edge {
 
-    public MongoDBEdge(final MongoDBGraph graph) {
+    public MongoDBEdge(final MongoDBGraphFork graph) {
         super(graph);
     }
 
-    public MongoDBEdge(final MongoDBGraph graph, final Object id) {
+    public MongoDBEdge(final MongoDBGraphFork graph, final Object id) {
         super(graph);
         this.id = id;
     }

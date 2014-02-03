@@ -20,12 +20,12 @@ public class MongoDBIterable<T extends Element> implements CloseableIterable<T> 
 
     private DBCursor cursorIds;
     private List<Object> ids;
-    private final MongoDBGraph graph;
+    private final MongoDBGraphFork graph;
     private Class<T> clazz;
     private List<PredicateContainer> predicates;
     private long limit = 0;
 
-    public MongoDBIterable(final DBCursor cursorIds, final MongoDBGraph graph, final Class<T> clazz, List<PredicateContainer> predicates, int limit) {
+    public MongoDBIterable(final DBCursor cursorIds, final MongoDBGraphFork graph, final Class<T> clazz, List<PredicateContainer> predicates, int limit) {
         this.cursorIds = cursorIds;
         this.graph = graph;
         this.clazz = clazz;
@@ -33,7 +33,7 @@ public class MongoDBIterable<T extends Element> implements CloseableIterable<T> 
         this.limit = limit;
     }
 
-    public MongoDBIterable(final List<Object> ids, final MongoDBGraph graph, final Class<T> clazz, List<PredicateContainer> predicates, int limit) {
+    public MongoDBIterable(final List<Object> ids, final MongoDBGraphFork graph, final Class<T> clazz, List<PredicateContainer> predicates, int limit) {
         this.graph = graph;
         this.ids = ids;
         this.clazz = clazz;

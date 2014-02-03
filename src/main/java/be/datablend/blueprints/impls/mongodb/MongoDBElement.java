@@ -18,10 +18,10 @@ import com.tinkerpop.blueprints.util.ElementHelper;
  */
 public abstract class MongoDBElement implements Element {
 
-    protected final MongoDBGraph graph;
+    protected final MongoDBGraphFork graph;
     protected Object id;
 
-    protected MongoDBElement(final MongoDBGraph graph) {
+    protected MongoDBElement(final MongoDBGraphFork graph) {
         this.graph = graph;
         id = UUID.randomUUID();
     }

@@ -21,11 +21,11 @@ import com.tinkerpop.blueprints.util.DefaultVertexQuery;
  */
 public class MongoDBVertex extends MongoDBElement implements Vertex {
 
-    public MongoDBVertex(final MongoDBGraph graph) {
+    public MongoDBVertex(final MongoDBGraphFork graph) {
         super(graph);
     }
 
-    public MongoDBVertex(final MongoDBGraph graph, final Object id) {
+    public MongoDBVertex(final MongoDBGraphFork graph, final Object id) {
         super(graph);
         this.id = id;
     }

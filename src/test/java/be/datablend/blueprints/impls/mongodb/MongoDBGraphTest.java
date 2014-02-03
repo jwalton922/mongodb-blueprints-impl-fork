@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
  */
 public class MongoDBGraphTest extends GraphTest {
 
-    private MongoDBGraph currentGraph;
+    private MongoDBGraphFork currentGraph;
 
     /* public void testMongoDBBenchmarkTestSuite() throws Exception {
         this.stopWatch();
@@ -83,7 +83,7 @@ public class MongoDBGraphTest extends GraphTest {
 
     @Override
     public Graph generateGraph() {
-        this.currentGraph = new MongoDBGraph("localhost", 27017);
+        this.currentGraph = new MongoDBGraphFork("localhost", 27017);
 //        DB db = new Fongo("test").getDB("graph");
 //        this.currentGraph = new MongoDBGraph(db);
         return this.currentGraph;
