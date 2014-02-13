@@ -45,7 +45,7 @@ public class MongoDBQuery extends DefaultGraphQuery {
                 //remove the value that was stored in the key and add it to the and.
                 andValues.add((DBObject) query.remove(mongoKey));
             }
-            andValues.add(new BasicDBObject().append(mongoKey, query));
+            andValues.add(new BasicDBObject().append(mongoKey, value));
             this.query.put("$and", andValues);
         } else {
             query.append(mongoKey, value);
