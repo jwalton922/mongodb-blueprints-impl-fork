@@ -17,6 +17,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.DefaultGraphQuery;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -31,6 +32,25 @@ public class MongoDBQuery extends DefaultGraphQuery {
     public MongoDBQuery(Graph graph) {
         super(graph);
         this.graph = (MongoDBGraphFork) graph;
+    }
+
+    private void addToQuery(String key, Object value) {
+        String mongoKey = MongoDBUtil.createPropertyKey(key);
+        if (this.query.containsField(mongoKey)) {
+            List<DBObject> andValues = null;
+            if (query.containsField("$and")) {
+                andValues = (List<DBObject>) query.get("$and");
+            } else {
+                andValues = new ArrayList<DBObject>();
+                //remove the value that was stored in the key and add it to the and.
+                andValues.add((DBObject) query.remove(mongoKey));
+            }
+            andValues.add(new BasicDBObject().append(mongoKey, query));
+            this.query.put("$and", andValues);
+        } else {
+            query.append(mongoKey, value);
+        }
+        //System.out.println("Current mongo query: " + query.toString());
     }
 
     @Override
@@ -56,7 +76,7 @@ public class MongoDBQuery extends DefaultGraphQuery {
     @Override
     public <T extends Comparable<T>> GraphQuery has(String key, T value, Compare compare) {
         super.has(key, value, compare);
-        
+
         String operator = null;
         if (compare == Compare.GREATER_THAN) {
             operator = "$gt";
@@ -71,17 +91,75 @@ public class MongoDBQuery extends DefaultGraphQuery {
         }
 
         if (operator != null) {
+            
             BasicDBObject queryObj = new BasicDBObject().append(operator, value);
-            query.append(MongoDBUtil.createPropertyKey(key), queryObj);
+            addToQuery(key, queryObj);            
         } else {
-            query.append(MongoDBUtil.createPropertyKey(key), value);
+            addToQuery(key, value);            
         }
-        System.out.println("Adding compare query to query object: "+query.toString());
+        System.out.println("Adding compare query to query object: " + query.toString());
         return this;
     }
 
     @Override
-    public GraphQuery has(String key, Predicate predicate, Object value) {
+    public GraphQuery has(String key, Predicate predicate, Object value) {        
+        String operator = null;
+        if (predicate == com.tinkerpop.blueprints.Compare.GREATER_THAN) {
+            operator = "$gt";
+        } else if (predicate == com.tinkerpop.blueprints.Compare.GREATER_THAN_EQUAL) {
+            operator = "$gte";
+        } else if (predicate == com.tinkerpop.blueprints.Compare.LESS_THAN) {
+            operator = "$lt";
+        } else if (predicate == com.tinkerpop.blueprints.Compare.LESS_THAN_EQUAL) {
+            operator = "$lte";
+        } else if (predicate == com.tinkerpop.blueprints.Compare.NOT_EQUAL) {
+            operator = "$ne";
+        }
+
+        if (operator != null) {
+            BasicDBObject query = new BasicDBObject().append(operator, value);
+            addToQuery(key, query);
+            
+            return this;
+        }
+        
+        if(predicate == com.tinkerpop.blueprints.Compare.EQUAL){
+            addToQuery(key, value);
+            return this;
+        }
+
+        if (predicate instanceof ArrayRangeSearchPredicate) {
+            if (value instanceof Object[]) {
+                Object[] valueArray = (Object[]) value;
+                Object min = valueArray[0];
+                Object max = valueArray[1];
+                BasicDBObject query = new BasicDBObject().append("$gte", min).append("$lte", max);
+                addToQuery(key, query);
+                return this;
+            } else {
+                String errorMsg = "Do not know how to deal with value of type: " + value.getClass().getName() + " for ArrayRangeSearchPredicate";
+                System.out.println(errorMsg);
+                throw new RuntimeException(errorMsg);
+            }
+        } else if(predicate instanceof ArraySearchPredicate){
+            if(value instanceof Map){
+                Map<String,Object> valueMap = (Map<String,Object>)value;
+                BasicDBObject query = new BasicDBObject();
+                for(String mapKey : valueMap.keySet()){
+                    query.put(mapKey, valueMap.get(mapKey));
+                }
+                addToQuery(key, query);
+            } else if(value instanceof DBObject){
+                DBObject query = (DBObject)value;
+                addToQuery(key, query);
+            }else {
+                String errorMsg = "Do not know how to deal with value of type "+value.getClass().getName()+" for ArraySearchPredicate";
+                System.out.println(errorMsg);
+                throw new RuntimeException(errorMsg);
+            }
+            return this;
+        }
+
         super.has(key, predicate, value);
         this.predicates.add(new PredicateContainer(key, predicate, value));
         System.out.println("MongoDbQuery has Called with predicate, not sure what to do here");
@@ -103,13 +181,13 @@ public class MongoDBQuery extends DefaultGraphQuery {
         String mongoKey = MongoDBUtil.createPropertyKey(key);
         if (query.containsField(mongoKey)) {
             List<DBObject> andValues = null;
-            if(query.containsField("$and")){
-                andValues = (List<DBObject>)query.get("$and");
+            if (query.containsField("$and")) {
+                andValues = (List<DBObject>) query.get("$and");
             } else {
                 andValues = new ArrayList<DBObject>();
-            }                         
+            }
             andValues.add(new BasicDBObject().append(mongoKey, value));
-            andValues.add(new BasicDBObject().append(mongoKey, query.remove(mongoKey)));            
+            andValues.add(new BasicDBObject().append(mongoKey, query.remove(mongoKey)));
             query.append("$and", andValues);
         } else {
             query.append(MongoDBUtil.createPropertyKey(key), value);
@@ -147,5 +225,4 @@ public class MongoDBQuery extends DefaultGraphQuery {
         return this;
 //        return super.interval(key, startValue, endValue); //To change body of generated methods, choose Tools | Templates.
     }
-
 }
