@@ -38,13 +38,18 @@ public class MongoDBQuery extends DefaultGraphQuery {
         String mongoKey = MongoDBUtil.createPropertyKey(key);
         if (this.query.containsField(mongoKey)) {
             List<DBObject> andValues = null;
+
             if (query.containsField("$and")) {
                 andValues = (List<DBObject>) query.get("$and");
             } else {
                 andValues = new ArrayList<DBObject>();
-                //remove the value that was stored in the key and add it to the and.
-                andValues.add((DBObject) query.remove(mongoKey));
+
             }
+            //remove the value that was stored in the key and add it to the and.
+            Object removedObject = query.remove(mongoKey);
+            BasicDBObject removedObjectQuery = new BasicDBObject().append(mongoKey, removedObject);
+            andValues.add(removedObjectQuery);
+            //add new value eto and list
             andValues.add(new BasicDBObject().append(mongoKey, value));
             this.query.put("$and", andValues);
         } else {
@@ -91,18 +96,18 @@ public class MongoDBQuery extends DefaultGraphQuery {
         }
 
         if (operator != null) {
-            
+
             BasicDBObject queryObj = new BasicDBObject().append(operator, value);
-            addToQuery(key, queryObj);            
+            addToQuery(key, queryObj);
         } else {
-            addToQuery(key, value);            
+            addToQuery(key, value);
         }
         System.out.println("Adding compare query to query object: " + query.toString());
         return this;
     }
 
     @Override
-    public GraphQuery has(String key, Predicate predicate, Object value) {        
+    public GraphQuery has(String key, Predicate predicate, Object value) {
         String operator = null;
         if (predicate == com.tinkerpop.blueprints.Compare.GREATER_THAN) {
             operator = "$gt";
@@ -119,41 +124,48 @@ public class MongoDBQuery extends DefaultGraphQuery {
         if (operator != null) {
             BasicDBObject query = new BasicDBObject().append(operator, value);
             addToQuery(key, query);
-            
+
             return this;
         }
-        
-        if(predicate == com.tinkerpop.blueprints.Compare.EQUAL){
+
+        if (predicate == com.tinkerpop.blueprints.Compare.EQUAL) {
             addToQuery(key, value);
             return this;
         }
 
         if (predicate instanceof ArrayRangeSearchPredicate) {
+            Object min = null;
+            Object max = null;
             if (value instanceof Object[]) {
                 Object[] valueArray = (Object[]) value;
-                Object min = valueArray[0];
-                Object max = valueArray[1];
-                BasicDBObject query = new BasicDBObject().append("$gte", min).append("$lte", max);
-                addToQuery(key, query);
+                min = valueArray[0];
+                max = valueArray[1];
                 return this;
+            } else if (value instanceof List) {
+                List valueList = (List) value;
+                min = valueList.get(0);
+                max = valueList.get(1);
             } else {
                 String errorMsg = "Do not know how to deal with value of type: " + value.getClass().getName() + " for ArrayRangeSearchPredicate";
                 System.out.println(errorMsg);
                 throw new RuntimeException(errorMsg);
             }
-        } else if(predicate instanceof ArraySearchPredicate){
-            if(value instanceof Map){
-                Map<String,Object> valueMap = (Map<String,Object>)value;
+            BasicDBObject query = new BasicDBObject().append("$gte", min).append("$lte", max);
+            addToQuery(key, query);
+            return this;
+        } else if (predicate instanceof ArraySearchPredicate) {
+            if (value instanceof Map) {
+                Map<String, Object> valueMap = (Map<String, Object>) value;
                 BasicDBObject query = new BasicDBObject();
-                for(String mapKey : valueMap.keySet()){
+                for (String mapKey : valueMap.keySet()) {
                     query.put(mapKey, valueMap.get(mapKey));
                 }
                 addToQuery(key, query);
-            } else if(value instanceof DBObject){
-                DBObject query = (DBObject)value;
+            } else if (value instanceof DBObject) {
+                DBObject query = (DBObject) value;
                 addToQuery(key, query);
-            }else {
-                String errorMsg = "Do not know how to deal with value of type "+value.getClass().getName()+" for ArraySearchPredicate";
+            } else {
+                String errorMsg = "Do not know how to deal with value of type " + value.getClass().getName() + " for ArraySearchPredicate";
                 System.out.println(errorMsg);
                 throw new RuntimeException(errorMsg);
             }
